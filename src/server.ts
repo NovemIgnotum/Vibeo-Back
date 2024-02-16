@@ -7,7 +7,6 @@ import config from './config/config';
 import Logging from './library/Logging';
 const express = require('express');
 const router = express();
-const cloudinary = require('cloudinary');
 const cron = require('node-cron');
 const cors = require('cors');
 
@@ -34,17 +33,13 @@ mongoose
         Logging.error(error);
     });
 
-import { checkingDate } from './functions/ExtractingData';
-
 // ROUTES
-
-// FUNCTIONS
 
 // The server start only if mongo is already connected
 const startServer = () => {
     // Check tous les Jours à 00:00 si nous avons changé de mois.
-    cron.schedule('0 0 0 * * *', () => {
-        checkingDate();
+    cron.schedule('0 0 * * *', () => {
+        Logging.info('Running a task every day at 00:00');
     });
 
     router.use(
