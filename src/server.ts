@@ -10,17 +10,6 @@ const router = express();
 const cron = require('node-cron');
 const cors = require('cors');
 
-/**================================================================================================
- *                                       TODO List
- * ToDo ****: Faire les dataConvention pour la creation d'un usager
- * ToDo 1: Inclure les contacts dans chaque action
- * ToDo 2: Faire les datas des conventions
- * ToDo 3: Faire la possibilité de creer un contact avec partenaire et usager controllers/contact ligne 18
- * ToDo 5: Se renseigner sur comment entre une pieces jointes dans le tableau interfaces/usager ligne 176
- * ToDo 6: Commencer le cleanCode et le codeReviews avec le dossier 'Components' situé dans la racine du projet
- *
- *================================================================================================**/
-
 mongoose
     .set('strictQuery', false)
     .connect(`${config.mongooseUrl}`, { retryWrites: true, w: 'majority' })
@@ -34,6 +23,10 @@ mongoose
     });
 
 // ROUTES
+import GenreRoutes from './routes/Genre';
+import BandRoutes from './routes/Band';
+import AlbumRoutes from './routes/Album';
+import TrackRoutes from './routes/Track';
 
 // The server start only if mongo is already connected
 const startServer = () => {
@@ -73,6 +66,10 @@ const startServer = () => {
     });
 
     // CRUDS
+    router.use('/genre', GenreRoutes);
+    router.use('/band', BandRoutes);
+    router.use('/album', AlbumRoutes);
+    router.use('/track', TrackRoutes);
 
     // FUNCTIONS
 
