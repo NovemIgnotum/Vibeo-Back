@@ -27,6 +27,7 @@ import GenreRoutes from './routes/Genre';
 import BandRoutes from './routes/Band';
 import AlbumRoutes from './routes/Album';
 import TrackRoutes from './routes/Track';
+import UserRoutes from './routes/User';
 
 // The server start only if mongo is already connected
 const startServer = () => {
@@ -70,6 +71,7 @@ const startServer = () => {
     router.use('/band', BandRoutes);
     router.use('/album', AlbumRoutes);
     router.use('/track', TrackRoutes);
+    router.use('/user', UserRoutes);
 
     // FUNCTIONS
 
