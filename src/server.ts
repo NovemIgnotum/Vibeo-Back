@@ -31,7 +31,6 @@ import UserRoutes from './routes/User';
 
 // The server start only if mongo is already connected
 const startServer = () => {
-    // Check tous les Jours à 00:00 si nous avons changé de mois.
     cron.schedule('0 0 * * *', () => {
         Logging.info('Running a task every day at 00:00');
     });

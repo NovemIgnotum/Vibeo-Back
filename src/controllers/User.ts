@@ -5,7 +5,7 @@ import Retour from '../library/Response';
 import dotenv from 'dotenv';
 const bcrypt = require('bcrypt');
 
-const createUser = async (req: Request, res: Response, next: NextFunction) => {
+const createUser = async (req: Request, res: Response) => {
     try {
         if (!req.body.email || !req.body.password || !req.body.name || !req.body.firstName || !req.body.pseudo) {
             Retour.error('One or more fields are missing');
@@ -43,29 +43,35 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
+const createAdmin = async (req: Request, res: Response) => {
     try {
         if (!req.body.email || !req.body.password || !req.body.name) {
             Retour.error('One or more fields are missing');
             return res.status(400).json('One or more fields are missing');
         } else {
-            const user = new User({
-                email: req.body.email,
-                password: req.body.password,
-                name: req.body.name,
-                firstName: req.body.firstName,
-                tokenVersion: 0,
-                role: 'admin'
-            });
-            const salt = await bcrypt.genSalt(10);
+            if (await User.findOne({ email: req.body.email })) {
+                Retour.error('This email is already used');
+                return res.status(400).json('This email is already used');
+            } else {
+                const user = new User({
+                    pseudo: req.body.pseudo,
+                    email: req.body.email,
+                    password: req.body.password,
+                    name: req.body.name,
+                    firstName: req.body.firstName,
+                    tokenVersion: 0,
+                    role: 'admin'
+                });
+                const salt = await bcrypt.genSalt(10);
 
-            const hashedPassword = await bcrypt.hash(req.body.password, salt);
+                const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-            user.password = hashedPassword;
+                user.password = hashedPassword;
 
-            await user.save();
+                await user.save();
 
-            res.status(201).json({ message: 'Admin created', user });
+                res.status(201).json({ message: 'Admin created', user });
+            }
         }
     } catch (error) {
         Retour.error({ message: 'Error Catched', error });
@@ -73,7 +79,7 @@ const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+const loginUser = async (req: Request, res: Response) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (!user) {
@@ -84,14 +90,14 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
             return res.status(400).json('Invalid password');
         }
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
-        res.status(200).json({ message: 'User logged in', token, user });
+        res.status(200).json({ message: 'User logged in', token });
     } catch (error) {
         Retour.error({ message: 'Error Catched', error });
         res.status(500).json({ message: 'Error Catched', error });
     }
 };
 
-const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
+const logoutUser = async (req: Request, res: Response) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (!user) {
@@ -106,7 +112,7 @@ const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+const getAllUsers = async (req: Request, res: Response) => {
     try {
         const admins = await User.find({ role: 'user' });
         res.status(200).json(admins);
@@ -116,7 +122,7 @@ const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const getUser = async (req: Request, res: Response, next: NextFunction) => {
+const getUser = async (req: Request, res: Response) => {
     try {
         if (!req.params.id) {
             Retour.error('Id field is missing');
@@ -136,9 +142,11 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const getAllAdmins = async (req: Request, res: Response, next: NextFunction) => {
+const getAllAdmins = async (req: Request, res: Response) => {
     try {
-        const admins = await User.find({ role: 'admin' });
+        const admins = await User.find({ role: 'user' });
+        console.log('---------------------------------------------------');
+        console.log(admins);
         res.status(200).json(admins);
     } catch (error) {
         Retour.error({ message: 'Error Catched', error });
@@ -146,7 +154,7 @@ const getAllAdmins = async (req: Request, res: Response, next: NextFunction) => 
     }
 };
 
-const getAdmin = async (req: Request, res: Response, next: NextFunction) => {
+const getAdmin = async (req: Request, res: Response) => {
     try {
         if (!req.params.id) {
             Retour.error('Id field is missing');
@@ -166,4 +174,46 @@ const getAdmin = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export default { createUser, createAdmin, loginUser, logoutUser, getAllUsers, getUser, getAllAdmins, getAdmin };
+const updateUser = async (req: Request, res: Response) => {
+    try {
+        if (!req.params.id) {
+            Retour.error('Id field is missing');
+            return res.status(400).json('Id field is missing');
+        } else {
+            const user = await User.findById(req.params.id);
+            if (!user) {
+                Retour.error('This user does not exist');
+                return res.status(400).json('This user does not exist');
+            } else {
+                if (req.body.pseudo) {
+                    user.pseudo = req.body.pseudo;
+                }
+                if (req.body.email) {
+                    user.email = req.body.email;
+                }
+                if (req.body.password) {
+                    user.password = req.body.password;
+                }
+                if (req.body.name) {
+                    user.name = req.body.name;
+                }
+                if (req.body.firstName) {
+                    user.firstName = req.body.firstName;
+                }
+                if (req.body.tokenVersion) {
+                    user.tokenVersion = req.body.tokenVersion;
+                }
+                if (req.body.role) {
+                    user.role = req.body.role;
+                }
+                await user.save();
+                res.status(200).json({ message: 'User updated', user });
+            }
+        }
+    } catch (error) {
+        Retour.error({ message: 'Error Catched', error });
+        res.status(500).json({ message: 'Error Catched', error });
+    }
+};
+
+export default { createUser, createAdmin, loginUser, logoutUser, getAllUsers, getUser, getAllAdmins, getAdmin, updateUser };
