@@ -15,6 +15,9 @@ services:
       - "3003:3003" 
     environment:
       - MONGO_URI=mongodb://mongodb:27017/vibeo
+      - PORT=3003
+      - NODE_ENV=development
+      - sb339175edc002c231eff5571ec90496183b7675706dfe7c7450d02c8664b6f01b0859400107d52358b6fb2f5f8a393528c999126a850a5c3ee69a7209b8d9aab
     depends_on:
       - mongodb
 
