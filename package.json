@@ -1,11 +1,12 @@
 {
     "version": "1.0.0",
     "license": "UNLICENSED",
-    "main": "index.js",
+    "main": "server.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "concurrently -k -n \"Typescript,Node\" -p \"name\" -c \"blue,green\"  \"tsc --watch\" \"nodemon dist/server.js\"",
-        "start": "node index.js"
+        "build": "tsc",
+        "start": "node index.js/ server.js"
     },
     "keywords": [],
     "author": "",
