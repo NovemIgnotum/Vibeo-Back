@@ -16,8 +16,8 @@ export const authenticateJWT = async (req: AuthenticatedRequest, res: Response, 
         return res.status(401).json({ message: 'Unauthorized' });
     }
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
-        const user = await User.findById((decoded as any).userId);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as object;
+        const user = await User.findById(Object(decoded).userId);
         if (!user) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
