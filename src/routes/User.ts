@@ -13,7 +13,6 @@ router.get('/:id', controller.getUser);
 router.get('/GetAllAds/', authenticateJWT, authorizeRole('admin'), controller.getAllAdmins);
 router.get('/Admin/:id', authenticateJWT, authorizeRole('admin'), controller.getAdmin);
 router.put('UpdateUser/:id', controller.updateUser);
-
 router.post('/Logout/', controller.logoutUser);
 
 export default router;

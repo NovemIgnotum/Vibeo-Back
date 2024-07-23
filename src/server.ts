@@ -73,6 +73,10 @@ const startServer = () => {
     router.use('/track', TrackRoutes);
     router.use('/user', UserRoutes);
 
+    router.get('/health', (req: Request, res: Response) => {
+        res.status(200).json('Server is running');
+    });
+
     // FUNCTIONS
 
     /**Error handling */
