@@ -79,24 +79,6 @@ const createAdmin = async (req: Request, res: Response) => {
     }
 };
 
-const loginUser = async (req: Request, res: Response) => {
-    try {
-        const user = await User.findOne({ email: req.body.email });
-        if (!user) {
-            return res.status(400).json('User not found');
-        }
-        const validPassword = await bcrypt.compare(req.body.password, user.password);
-        if (!validPassword) {
-            return res.status(400).json('Invalid password');
-        }
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
-        res.status(200).json({ message: 'User logged in', token });
-    } catch (error) {
-        Retour.error({ message: 'Error Catched', error });
-        res.status(500).json({ message: 'Error Catched', error });
-    }
-};
-
 const logoutUser = async (req: Request, res: Response) => {
     try {
         const user = await User.findOne({ email: req.body.email });
@@ -112,6 +94,32 @@ const logoutUser = async (req: Request, res: Response) => {
     }
 };
 
+const login = async (req: Request, res: Response) => {
+    try {
+        if (!req.body.email || !req.body.password) {
+            Retour.error('One or more fields are missing');
+            return res.status(400).json('One or more fields are missing');
+        } else {
+            const user = await User.findOne({ email: req.body.email });
+            if (!user) {
+                Retour.error('Email not found');
+                return res.status(400).json('Email not found');
+            } else {
+                const validPassword = await bcrypt.compare(req.body.password, user.password);
+                if (!validPassword) {
+                    Retour.error('Invalid password');
+                    return res.status(400).json('Invalid password');
+                } else {
+                    const token = jwt.sign({ id: user._id }, `${process.env.JWT_SECRET}`, { expiresIn: '30m' });
+                    return res.status(200).json({ message: 'user connected', token });
+                }
+            }
+        }
+    } catch (error) {
+        Retour.error({ message: 'Error Catched', error });
+        res.status(500).json({ message: 'Error Catched', error });
+    }
+};
 const getAllUsers = async (req: Request, res: Response) => {
     try {
         const admins = await User.find({ role: 'user' });
@@ -216,4 +224,4 @@ const updateUser = async (req: Request, res: Response) => {
     }
 };
 
-export default { createUser, createAdmin, loginUser, logoutUser, getAllUsers, getUser, getAllAdmins, getAdmin, updateUser };
+export default { createUser, createAdmin, logoutUser, getAllUsers, getUser, getAllAdmins, getAdmin, updateUser, login };
