@@ -8,7 +8,10 @@ const userSchema = new Schema<IUser>({
     name: { type: String, required: true },
     firstName: { type: String, required: true },
     tokenVersion: { type: Number, default: 0 },
-    role: { type: String, default: 'user' }
+    role: { type: String, default: 'user' },
+    profilePicture: { type: String, default: null },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
 });
 
 const User = model<IUser>('User', userSchema);

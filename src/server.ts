@@ -3,8 +3,8 @@ import { Request, Response, NextFunction } from 'express';
 import http from 'http';
 import mongoose from 'mongoose';
 import config from './config/config';
-// Library
 import Logging from './library/Logging';
+// Library
 const express = require('express');
 const router = express();
 const cron = require('node-cron');
@@ -29,6 +29,7 @@ import BandRoutes from './routes/Band';
 import AlbumRoutes from './routes/Album';
 import TrackRoutes from './routes/Track';
 import UserRoutes from './routes/User';
+import PlaylistRoutes from './routes/Playlist';
 
 // The server start only if mongo is already connected
 const startServer = () => {
@@ -67,11 +68,12 @@ const startServer = () => {
     });
 
     // CRUDS
-    router.use('/genre', GenreRoutes);
-    router.use('/band', BandRoutes);
-    router.use('/album', AlbumRoutes);
-    router.use('/track', TrackRoutes);
-    router.use('/user', UserRoutes);
+    router.use('/genre/', GenreRoutes);
+    router.use('/band/', BandRoutes);
+    router.use('/album/', AlbumRoutes);
+    router.use('/track/', TrackRoutes);
+    router.use('/user/', UserRoutes);
+    router.use('/playlist/', PlaylistRoutes);
 
     router.get('/health', (req: Request, res: Response) => {
         res.status(200).json('Server is running');

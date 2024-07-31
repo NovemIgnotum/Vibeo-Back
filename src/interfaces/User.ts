@@ -8,4 +8,9 @@ export interface IUser extends Document {
     firstName: string;
     tokenVersion: number;
     role: string;
+    profilePicture: String;
+    salt: string;
+    hash: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
