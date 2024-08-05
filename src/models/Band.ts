@@ -5,7 +5,9 @@ const bandSchema = new Schema<Band>({
     name: { type: String, required: true },
     genre: { type: Schema.Types.ObjectId, ref: 'Genre', required: true },
     members: [{ type: String, required: true }],
-    albums: [{ type: Schema.Types.ObjectId, ref: 'Album' }]
+    albums: [{ type: Schema.Types.ObjectId, ref: 'Album' }],
+    profilePic: { type: String },
+    backgroundPic: { type: String }
 });
 
 const Band = model<Band>('Band', bandSchema);

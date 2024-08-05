@@ -3,8 +3,9 @@ import { Track } from '../interfaces/Track';
 
 const trackSchema = new Schema<Track>({
     title: { type: String, required: true },
-    duration: { type: Number, required: true },
-    band: { type: Schema.Types.ObjectId, ref: 'Band', require: true }
+    band: { type: Schema.Types.ObjectId, ref: 'Band' },
+    genre: { type: Schema.Types.ObjectId, ref: 'Genre' },
+    track: { type: String, required: true }
 });
 
 const Track = model<Track>('Track', trackSchema);

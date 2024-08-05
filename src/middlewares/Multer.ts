@@ -24,14 +24,15 @@ export const multerConfig: Options = {
         }
     }),
     limits: {
-        fileSize: 5 * 1024 * 1024 // Limite de taille de 5 Mo
+        fileSize: 100 * 1024 * 1024
     },
     fileFilter: (req, file, cb) => {
-        const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png'];
+        const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'audio/mpeg', 'audio/mp3', 'video/mp4'];
         if (allowedMimes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error('Invalid file type. Only JPEG, PNG files are allowed.'));
+            console.log(file);
+            cb(new Error('Invalid file type. Only JPEG, PNG, MPEG, MP3 files are allowed.'));
         }
     }
 };

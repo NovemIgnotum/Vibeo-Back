@@ -3,15 +3,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
 const Band_1 = __importDefault(require("../controllers/Band"));
+const express_1 = __importDefault(require("express"));
+const multer_1 = __importDefault(require("multer"));
+const Multer_1 = require("../middlewares/Multer");
+const upload = (0, multer_1.default)(Multer_1.multerConfig);
+const cpUpload = upload.fields([
+    { name: 'profilePic', maxCount: 1 },
+    { name: 'backgroundPic', maxCount: 1 }
+]);
 const router = express_1.default.Router();
-router.post('/Create/', Band_1.default.createBand);
-router.get('/GetAll/', Band_1.default.getAllBands);
-router.get('/Get/:id', Band_1.default.getBand);
-router.put('/UpdateMember/:id', Band_1.default.updateMember);
-router.put('/UpdateAlbums/:id', Band_1.default.updateAlbums);
-router.put('/UpdateInfo/:id', Band_1.default.updateInfo);
+router.post('/Create/', cpUpload, Band_1.default.createBand);
+router.get('/GetAll/', Band_1.default.readAllBands);
+router.get('/:id', Band_1.default.readOneBand);
+router.put('/Update/:id', cpUpload, Band_1.default.updateBand);
 router.delete('/Delete/:id', Band_1.default.deleteBand);
 exports.default = router;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQmFuZC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9yb3V0ZXMvQmFuZC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7OztBQUFBLHNEQUE4QjtBQUc5QiwrREFBNkM7QUFFN0MsTUFBTSxNQUFNLEdBQUcsaUJBQU8sQ0FBQyxNQUFNLEVBQUUsQ0FBQztBQUVoQyxNQUFNLENBQUMsSUFBSSxDQUFDLFVBQVUsRUFBRSxjQUFVLENBQUMsVUFBVSxDQUFDLENBQUM7QUFDL0MsTUFBTSxDQUFDLEdBQUcsQ0FBQyxVQUFVLEVBQUUsY0FBVSxDQUFDLFdBQVcsQ0FBQyxDQUFDO0FBQy9DLE1BQU0sQ0FBQyxHQUFHLENBQUMsVUFBVSxFQUFFLGNBQVUsQ0FBQyxPQUFPLENBQUMsQ0FBQztBQUMzQyxNQUFNLENBQUMsR0FBRyxDQUFDLG1CQUFtQixFQUFFLGNBQVUsQ0FBQyxZQUFZLENBQUMsQ0FBQztBQUN6RCxNQUFNLENBQUMsR0FBRyxDQUFDLG1CQUFtQixFQUFFLGNBQVUsQ0FBQyxZQUFZLENBQUMsQ0FBQztBQUN6RCxNQUFNLENBQUMsR0FBRyxDQUFDLGlCQUFpQixFQUFFLGNBQVUsQ0FBQyxVQUFVLENBQUMsQ0FBQztBQUNyRCxNQUFNLENBQUMsTUFBTSxDQUFDLGFBQWEsRUFBRSxjQUFVLENBQUMsVUFBVSxDQUFDLENBQUM7QUFFcEQsa0JBQWUsTUFBTSxDQUFDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQmFuZC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9yb3V0ZXMvQmFuZC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7OztBQUFBLCtEQUE2QztBQUM3QyxzREFBOEI7QUFDOUIsb0RBQTRCO0FBQzVCLGtEQUFxRDtBQUVyRCxNQUFNLE1BQU0sR0FBRyxJQUFBLGdCQUFNLEVBQUMscUJBQVksQ0FBQyxDQUFDO0FBQ3BDLE1BQU0sUUFBUSxHQUFHLE1BQU0sQ0FBQyxNQUFNLENBQUM7SUFDM0IsRUFBRSxJQUFJLEVBQUUsWUFBWSxFQUFFLFFBQVEsRUFBRSxDQUFDLEVBQUU7SUFDbkMsRUFBRSxJQUFJLEVBQUUsZUFBZSxFQUFFLFFBQVEsRUFBRSxDQUFDLEVBQUU7Q0FDekMsQ0FBQyxDQUFDO0FBRUgsTUFBTSxNQUFNLEdBQUcsaUJBQU8sQ0FBQyxNQUFNLEVBQUUsQ0FBQztBQUVoQyxNQUFNLENBQUMsSUFBSSxDQUFDLFVBQVUsRUFBRSxRQUFRLEVBQUUsY0FBVSxDQUFDLFVBQVUsQ0FBQyxDQUFDO0FBQ3pELE1BQU0sQ0FBQyxHQUFHLENBQUMsVUFBVSxFQUFFLGNBQVUsQ0FBQyxZQUFZLENBQUMsQ0FBQztBQUNoRCxNQUFNLENBQUMsR0FBRyxDQUFDLE1BQU0sRUFBRSxjQUFVLENBQUMsV0FBVyxDQUFDLENBQUM7QUFDM0MsTUFBTSxDQUFDLEdBQUcsQ0FBQyxhQUFhLEVBQUUsUUFBUSxFQUFFLGNBQVUsQ0FBQyxVQUFVLENBQUMsQ0FBQztBQUMzRCxNQUFNLENBQUMsTUFBTSxDQUFDLGFBQWEsRUFBRSxjQUFVLENBQUMsVUFBVSxDQUFDLENBQUM7QUFFcEQsa0JBQWUsTUFBTSxDQUFDIn0=

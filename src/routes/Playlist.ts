@@ -12,5 +12,6 @@ router.post('/create', cpUpload, controller.createPlaylist);
 router.get('/readAll', controller.readAllPlaylists);
 router.get('/readAll/:owner', controller.readAllPlaylistsByUser);
 router.put('/update/:id', cpUpload, controller.updatePlaylist);
+router.delete('/delete/:id', controller.deletePlaylist);
 
 export default router;

@@ -1,16 +1,20 @@
-import express from 'express';
-
-// Controllers
 import controller from '../controllers/Band';
+import express from 'express';
+import multer from 'multer';
+import { multerConfig } from '../middlewares/Multer';
+
+const upload = multer(multerConfig);
+const cpUpload = upload.fields([
+    { name: 'profilePic', maxCount: 1 },
+    { name: 'backgroundPic', maxCount: 1 }
+]);
 
 const router = express.Router();
 
-router.post('/Create/', controller.createBand);
-router.get('/GetAll/', controller.getAllBands);
-router.get('/Get/:id', controller.getBand);
-router.put('/UpdateMember/:id', controller.updateMember);
-router.put('/UpdateAlbums/:id', controller.updateAlbums);
-router.put('/UpdateInfo/:id', controller.updateInfo);
+router.post('/Create/', cpUpload, controller.createBand);
+router.get('/GetAll/', controller.readAllBands);
+router.get('/:id', controller.readOneBand);
+router.put('/Update/:id', cpUpload, controller.updateBand);
 router.delete('/Delete/:id', controller.deleteBand);
 
 export default router;

@@ -1,4 +1,3 @@
-// src/controllers/Playlist.ts
 import { Request, Response } from 'express';
 import cloudinary from '../config/cloudinary';
 import Playlist from '../models/Playlist';
@@ -101,4 +100,27 @@ const updatePlaylist = async (req: Request, res: Response) => {
     }
 };
 
-export default { createPlaylist, readAllPlaylists, readAllPlaylistsByUser, updatePlaylist };
+const deletePlaylist = async (req: Request, res: Response) => {
+    try {
+        if (!req.params.id) {
+            Retour.error('No ID provided');
+            return res.status(400).json({ message: 'No ID provided' });
+        } else {
+            const playlist = await Playlist.findById(req.params.id);
+            if (!playlist) {
+                Retour.error('Playlist not found');
+                return res.status(404).json({ message: 'Playlist not found' });
+            } else {
+                const playlistRes = playlist.cover.split('/').pop();
+                cloudinary.uploader.destroy(playlistRes?.split('.')[0]);
+
+                await Playlist.findByIdAndDelete(req.params.id);
+                res.status(200).json({ message: 'Playlist deleted' });
+            }
+        }
+    } catch (error) {
+        Retour.error(error);
+        res.status(500).json({ message: 'Error deleting playlist', error: Object(error).message });
+    }
+};
+export default { createPlaylist, readAllPlaylists, readAllPlaylistsByUser, updatePlaylist, deletePlaylist };

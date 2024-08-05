@@ -5,4 +5,6 @@ export interface Band extends Document {
     genre: Types.ObjectId;
     members: string[];
     albums: Types.ObjectId[];
+    profilePic: string;
+    backgroundPic: string;
 }
