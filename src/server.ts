@@ -4,6 +4,12 @@ import http from 'http';
 import mongoose from 'mongoose';
 import config from './config/config';
 import Logging from './library/Logging';
+
+//MODEL
+import Band from './models/Band';
+import Track from './models/Track';
+import User from './models/User';
+import Playlist from './models/Playlist';
 // Library
 const express = require('express');
 const router = express();
@@ -26,7 +32,6 @@ mongoose
 // ROUTES
 import GenreRoutes from './routes/Genre';
 import BandRoutes from './routes/Band';
-import AlbumRoutes from './routes/Album';
 import TrackRoutes from './routes/Track';
 import UserRoutes from './routes/User';
 import PlaylistRoutes from './routes/Playlist';
@@ -70,13 +75,39 @@ const startServer = () => {
     // CRUDS
     router.use('/genre/', GenreRoutes);
     router.use('/band/', BandRoutes);
-    router.use('/album/', AlbumRoutes);
     router.use('/track/', TrackRoutes);
     router.use('/user/', UserRoutes);
     router.use('/playlist/', PlaylistRoutes);
 
-    router.get('/health', (req: Request, res: Response) => {
-        res.status(200).json('Server is running');
+    // Search route
+    router.get('/search/:query', async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const queryParam = req.params.query as string; // Specify 'query' as string
+            console.log(queryParam);
+            const regex = new RegExp(queryParam, 'i');
+            console.log(regex);
+
+            const results = await Promise.all([
+                Band.find({ name: regex }),
+                Track.find({ title: regex }),
+                User.find({ username: regex }),
+                Playlist.find({ name: regex })
+            ]);
+
+            const [bands, albums, tracks, users] = results;
+
+            const response = {
+                bands,
+                albums,
+                tracks,
+                users
+            };
+
+            res.status(200).json(response);
+        } catch (error) {
+            Logging.error(error);
+            next(error);
+        }
     });
 
     // FUNCTIONS
