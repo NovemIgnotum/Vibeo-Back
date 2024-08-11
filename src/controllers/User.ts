@@ -6,6 +6,8 @@ const uid2 = require('uid2');
 const jwt = require('jsonwebtoken');
 
 import User from '../models/User';
+import Playlist from '../models/Playlist';
+import { error } from 'console';
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
     const { email, name, firstname, password, pseudo } = req.body;
@@ -89,7 +91,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             const verificatedHash = SHA256(password + findedUser.salt).toString(encBase64);
             if (verificatedHash === findedUser.hash) {
                 const token = jwt.sign({ findedUser }, process.env.JWT_SECRET, { expiresIn: '1h' });
-                return res.status(200).json({ message: 'Connected', token: token });
+                return res.status(200).json({ message: 'Connected', token: token, id: findedUser.id });
             } else {
                 return res.status(400).json({ message: 'Wrong password' });
             }
@@ -200,4 +202,66 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export default { createUser, readUser, readAll, updateUser, deleteUser, login, logout };
+const addPlaylist = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.params.id) {
+            return res.status(404).json('Missing parameters');
+        } else {
+            const { playlist } = req.body;
+            if (!playlist) {
+                return res.status(404).json('One or many fields missing');
+            } else {
+                const playlistFinded = await Playlist.findById(playlist);
+                const userFinded = await User.findById(req.params.id);
+                if (!playlistFinded) {
+                    return res.status(404).json('Playlist not found');
+                }
+                if (!userFinded) {
+                    return res.status(404).json('User not found');
+                }
+
+                const alreadyAdded = userFinded.playlist.find((p) => p.toString() === playlist.toString());
+                if (alreadyAdded) {
+                    return res.status(400).json('You already added this playlist');
+                } else {
+                    userFinded.playlist.push(playlist);
+
+                    await userFinded.save();
+
+                    return res.status(200).json({ message: 'Playlist added to the user', userFinded });
+                }
+            }
+        }
+    } catch (e) {
+        return res.status(500).json({ error: Object(e).message });
+    }
+};
+
+const removePlaylist = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.params.id) {
+            return res.status(404).json('Missing parmaters');
+        } else {
+            const userFinded = await User.findById(req.params.id);
+            if (!userFinded) {
+                return res.status(404).json('User not found');
+            }
+            const { playlist } = req.body;
+            const playlistFinded = await Playlist.findById(playlist);
+            if (!playlistFinded) {
+                return res.status(404).json('Playlist not found');
+            }
+            const isAdded = userFinded.playlist.find((p) => p.toString() === playlist.toString());
+            if (isAdded) {
+                userFinded.playlist = userFinded.playlist.filter((p) => p.toString() !== playlist.toString());
+                await userFinded.save();
+                return res.status(200).json({ message: 'Playlist remove from this user', userFinded });
+            } else {
+                return res.status(404).json('This user does not have this playlist');
+            }
+        }
+    } catch (e) {
+        return res.status(500).json({ message: 'Error catched', e });
+    }
+};
+export default { createUser, readUser, readAll, updateUser, deleteUser, login, logout, addPlaylist, removePlaylist };

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import cloudinary from '../config/cloudinary';
 import Playlist from '../models/Playlist';
+import User from '../models/User';
 import Retour from '../library/Response';
 
 const createPlaylist = async (req: Request, res: Response) => {
@@ -123,4 +124,5 @@ const deletePlaylist = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error deleting playlist', error: Object(error).message });
     }
 };
+
 export default { createPlaylist, readAllPlaylists, readAllPlaylistsByUser, updatePlaylist, deletePlaylist };

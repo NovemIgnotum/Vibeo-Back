@@ -15,7 +15,8 @@ const userSchema = new Schema<IUser>({
     hash: { type: String, required: true },
     tokenVersion: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
+    playlist: [{ type: Schema.Types.ObjectId }]
 });
 
 const User = model<IUser>('User', userSchema);

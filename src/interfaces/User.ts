@@ -11,6 +11,7 @@ export interface IUser extends Document {
     role: string;
     profilePicture: String;
     backgroundPicture: String;
+    playlist: Types.ObjectId[];
     salt: string;
     hash: string;
     createdAt: Date;
