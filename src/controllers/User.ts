@@ -10,8 +10,8 @@ import Playlist from '../models/Playlist';
 import { error } from 'console';
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
-    const { email, name, firstname, password, pseudo } = req.body;
-    if (!email || !name || !firstname || !password || !pseudo) {
+    const { email, name, firstname, password, pseudo, profilePicture, background } = req.body;
+    if (!email || !name || !firstname || !password || !pseudo || !profilePicture || !background) {
         return res.status(400).json({ message: 'Missing parameters' });
     } else {
         if (await User.findOne({ pseudo })) {

@@ -57,7 +57,7 @@ const createBand = async (req: Request, res: Response, next: NextFunction) => {
 
 const readAllBands = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const bands = await Band.find().populate('genre').populate('albums');
+        const bands = await Band.find();
         return res.status(200).json({ bands: bands });
     } catch (error) {
         return res.status(500).json({ message: Object(error).message });
@@ -166,4 +166,13 @@ const deleteBand = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(500).json({ error: Object(e).message });
     }
 };
-export default { createBand, readAllBands, readOneBand, updateBand, deleteBand };
+
+const getRandBand = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const bands = await Band.aggregate([{ $sample: { size: 3 } }]);
+        return res.status(200).json({ bands: bands });
+    } catch (e) {
+        return res.status(500).json({ error: Object(e).message });
+    }
+}
+export default { createBand, readAllBands, readOneBand, updateBand, deleteBand, getRandBand };

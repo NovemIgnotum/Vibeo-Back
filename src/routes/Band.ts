@@ -13,8 +13,9 @@ const router = express.Router();
 
 router.post('/Create/', cpUpload, controller.createBand);
 router.get('/GetAll/', controller.readAllBands);
-router.get('/:id', controller.readOneBand);
+router.get('GetOne/:id', controller.readOneBand);
 router.put('/Update/:id', cpUpload, controller.updateBand);
 router.delete('/Delete/:id', controller.deleteBand);
+router.get('/GetRandomBand', controller.getRandBand);
 
 export default router;

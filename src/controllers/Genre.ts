@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import cloudinary from '../config/cloudinary';
 
 const uid2 = require('uid2');
 
@@ -10,7 +11,7 @@ import Retour from '../library/Response';
 
 const createGenre = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (!req.body.name || !req.body.description) {
+        if (!req.body.name || !req.body.description || !Object(req).files.picture) {
             Retour.error('One or many fields are missing');
             return res.status(400).json('One or many fields are missing');
         } else {
@@ -18,12 +19,19 @@ const createGenre = async (req: Request, res: Response, next: NextFunction) => {
                 Retour.error('This genre already exists');
                 return res.status(400).json('This genre already exists');
             } else {
-                const { name, description } = req.body;
-                const token = uid2(26);
+                const file = Object(req).files.picture[0];
+                const result = await cloudinary.uploader.upload(file.path, {
+                    folder: 'genres',
+                    use_filename: true,
+                    unique_filename: false,
+                    overwrite: true
+                });
+
                 const genre = new Genre({
-                    token,
-                    name,
-                    description
+                    name : req.body.name,
+                    description : req.body.description,
+                    picture: result.secure_url
+
                 });
                 await genre.save();
                 return res.status(201).json(genre);

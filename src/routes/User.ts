@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import express from 'express';
 import controller from '../controllers/User';
 import multer from 'multer';
 import { multerConfig } from '../middlewares/Multer';

@@ -13,6 +13,13 @@ const createPlaylist = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'One or more fields are missing' });
         }
 
+        const findedUser = await User.findById(owner);
+
+        if (!findedUser) {
+            Retour.error('User not found');
+            return res.status(404).json({ message: 'User not found' });
+        }
+
         let coverUrl = '';
 
         if (req.files && Object(req).files.cover && Object(req).files.cover.length > 0) {
@@ -34,6 +41,9 @@ const createPlaylist = async (req: Request, res: Response) => {
         });
 
         await playlist.save();
+
+        await findedUser.playlist.push(playlist._id);
+
 
         res.status(201).json({ message: 'Playlist created', playlist });
     } catch (error) {
