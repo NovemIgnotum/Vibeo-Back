@@ -113,4 +113,14 @@ const deleteGenre = async (req: Request, res: Response, next: NextFunction) => {
         }
     } catch (error) {}
 };
-export default { createGenre, getAllGenres, getGenre, updateGenre, deleteGenre };
+
+const getRandomGenre = async (req : Request, res : Response, next : NextFunction) => {
+    try {
+        const genre = await Genre.aggregate([{ $sample: { size: 3 } }]);
+        return res.status(200).json({genre : genre});
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Error Catched', error });
+    }
+}
+export default { createGenre, getAllGenres, getGenre, updateGenre, deleteGenre, getRandomGenre };

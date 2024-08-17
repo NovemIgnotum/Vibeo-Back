@@ -15,6 +15,7 @@ router.post('/Create/', cpUpload, controller.createGenre);
 router.get('/GetAll/', controller.getAllGenres);
 router.get('/Get/:id', controller.getGenre);
 router.put('/Update/:id',cpUpload, controller.updateGenre);
+router.get('/randomGenre/', controller.getRandomGenre);
 router.delete('/Delete/:id', controller.deleteGenre);
 
 export default router;
