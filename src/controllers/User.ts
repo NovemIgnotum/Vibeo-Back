@@ -10,66 +10,72 @@ import Playlist from '../models/Playlist';
 import { error } from 'console';
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
-    const { email, name, firstname, password, pseudo} = req.body;
-    if (!email || !name || !firstname || !password || !pseudo ) {
-        return res.status(400).json({ message: 'Missing parameters' });
-    } else {
-        if (await User.findOne({ pseudo })) {
-            return res.status(400).json({ message: 'User already exist' });
+    try {
+        const { email, name, firstname, password, pseudo} = req.body;
+        if (!email || !name || !firstname || !password || !pseudo ) {
+            return res.status(400).json({ message: 'Missing parameters' });
         } else {
-            if (await User.findOne({ email })) {
+            if (await User.findOne({ pseudo })) {
                 return res.status(400).json({ message: 'User already exist' });
             } else {
-                const salt: string = uid2(26);
-                const hash: string = SHA256(password + salt).toString(encBase64);
-
-                if (req.body.role) {
-                    const role = req.body.role;
-                    const user = new User({
-                        account: {
-                            name,
-                            firstname
-                        },
-                        email,
-                        pseudo,
-                        role,
-                        salt,
-                        hash
-                    });
-
-                    return user
-                        .save()
-                        .then((user) => res.status(201).json({ user: user }))
-                        .catch((error) => res.status(500).json({ error: error.message }));
+                if (await User.findOne({ email })) {
+                    return res.status(400).json({ message: 'User already exist' });
                 } else {
-                    const user = new User({
-                        account: {
-                            name,
-                            firstname
-                        },
-                        email,
-                        pseudo,
-                        salt,
-                        hash
-                    });
-
-                    return user
-                        .save()
-                        .then((user) => res.status(201).json({ user: user }))
-                        .catch((error) => res.status(500).json({ error: error.message }));
+                    const salt: string = uid2(26);
+                    const hash: string = SHA256(password + salt).toString(encBase64);
+    
+                    if (req.body.role) {
+                        const role = req.body.role;
+                        const user = new User({
+                            account: {
+                                name,
+                                firstname
+                            },
+                            email,
+                            pseudo,
+                            role,
+                            salt,
+                            hash
+                        });
+    
+                        return user
+                            .save()
+                            .then((user) => res.status(201).json({ user: user }))
+                            .catch((error) => res.status(500).json({ error: error.message }));
+                    } else {
+                        const user = new User({
+                            account: {
+                                name,
+                                firstname
+                            },
+                            email,
+                            pseudo,
+                            salt,
+                            hash
+                        });
+    
+                        return user
+                            .save()
+                            .then((user) => res.status(201).json({ user: user }))
+                            .catch((error) => res.status(500).json({ error: error.message }));
+                    }
                 }
             }
         }
+
+    } catch (error) {
+        return res.status(500).json({ error: Object(error).message });
     }
+
 };
 
-const readUser = (req: Request, res: Response, next: NextFunction) => {
+const readUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.params.id;
         if (!userId) {
             return res.status(400).json({ message: 'No ID provided' });
         } else {
-            const userFinded = User.findById(userId);
+            const userFinded = await User.findById(userId);
             if (!userFinded) {
                 return res.status(404).json({ message: 'User not found' });
             } else {
@@ -81,9 +87,9 @@ const readUser = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const readAll = (req: Request, res: Response, next: NextFunction) => {
+const readAll =  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const users = User.find();
+        const users = await User.find();
         if (!users) {
             return res.status(404).json({ message: 'No user found' });
         } else {
