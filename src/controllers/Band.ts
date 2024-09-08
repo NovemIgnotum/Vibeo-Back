@@ -175,4 +175,6 @@ const getRandBand = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(500).json({ error: Object(e).message });
     }
 }
+
+
 export default { createBand, readAllBands, readOneBand, updateBand, deleteBand, getRandBand };

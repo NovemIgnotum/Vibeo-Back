@@ -10,8 +10,8 @@ import Playlist from '../models/Playlist';
 import { error } from 'console';
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
-    const { email, name, firstname, password, pseudo, profilePicture, background } = req.body;
-    if (!email || !name || !firstname || !password || !pseudo || !profilePicture || !background) {
+    const { email, name, firstname, password, pseudo} = req.body;
+    if (!email || !name || !firstname || !password || !pseudo ) {
         return res.status(400).json({ message: 'Missing parameters' });
     } else {
         if (await User.findOne({ pseudo })) {
@@ -64,41 +64,64 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const readUser = (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.params.id;
-    console.log(userId);
-
-    return User.findById(userId)
-        .then((user) => (user ? res.status(200).json({ message: user }) : res.status(404).json({ message: 'Not found' })))
-        .catch((error) => res.status(500).json({ error: error.message }));
+    try {
+        const userId = req.params.id;
+        if (!userId) {
+            return res.status(400).json({ message: 'No ID provided' });
+        } else {
+            const userFinded = User.findById(userId);
+            if (!userFinded) {
+                return res.status(404).json({ message: 'User not found' });
+            } else {
+                return res.status(200).json({ message: userFinded });
+        }
+    }
+    } catch (error) {
+        return res.status(500).json({ error: Object(error).message });
+    }
 };
 
 const readAll = (req: Request, res: Response, next: NextFunction) => {
-    return User.find()
-        .then((users) => res.status(200).json({ message: users }))
-        .catch((error) => res.status(500).json({ error: error.message }));
+    try {
+        const users = User.find();
+        if (!users) {
+            return res.status(404).json({ message: 'No user found' });
+        } else {
+            return res.status(200).json({ message: users });
+        }
+
+    } catch (error) {
+        return res.status(500).json({ error: Object(error).message });
+    }
 };
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Missing parameters' });
-    } else {
-        console.log(email);
-        const findedByIdUser = await User.findOne({ email });
-        console.log(findedByIdUser);
-        const findedUser = await User.findOne({ email: email });
-        if (findedUser) {
-            const verificatedHash = SHA256(password + findedUser.salt).toString(encBase64);
-            if (verificatedHash === findedUser.hash) {
-                const token = jwt.sign({ findedUser }, process.env.JWT_SECRET, { expiresIn: '1h' });
-                return res.status(200).json({ message: 'Connected', token: token, id: findedUser.id });
-            } else {
-                return res.status(400).json({ message: 'Wrong password' });
-            }
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Missing parameters' });
         } else {
-            return res.status(404).json({ message: 'User not found' });
+            console.log(email);
+            const findedByIdUser = await User.findOne({ email });
+            console.log(findedByIdUser);
+            const findedUser = await User.findOne({ email: email });
+            if (findedUser) {
+                const verificatedHash = SHA256(password + findedUser.salt).toString(encBase64);
+                if (verificatedHash === findedUser.hash) {
+                    const token = jwt.sign({ findedUser }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                    return res.status(200).json({ message: 'Connected', token: token, id: findedUser.id });
+                } else {
+                    return res.status(400).json({ message: 'Wrong password' });
+                }
+            } else {
+                return res.status(404).json({ message: 'User not found' });
+            }
         }
+
+    } catch (error) {
+        return res.status(500).json({ error: Object(error).message });
     }
+ 
 };
 
 const logout = async (req: Request, res: Response, next: NextFunction) => {
@@ -264,4 +287,103 @@ const removePlaylist = async (req: Request, res: Response, next: NextFunction) =
         return res.status(500).json({ message: 'Error catched', e });
     }
 };
-export default { createUser, readUser, readAll, updateUser, deleteUser, login, logout, addPlaylist, removePlaylist };
+
+const addFollowing = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const findedUser = await User.findById(req.params.id);
+        if (!findedUser) {
+            return res.status(404).json('User not found');
+        }
+        const { following } = req.body;
+        const findedFollowing = await User.findById(following);
+        if (!findedFollowing) {
+            return res.status(404).json('Following not found');
+        }
+
+        const alreadyFollowing = findedUser.following.find((f) => f.toString() === following.toString());
+        if (alreadyFollowing) {
+            return res.status(400).json('You already follow this user');
+        } else {
+            findedUser.following.push(following);
+            findedFollowing.followers.push(findedUser._id);
+            await findedUser.save();
+            await findedFollowing.save();
+            return res.status(200).json({ message: 'You follow this user', findedUser });
+        }
+    } catch (e) {
+        return res.status(500).json({ message: 'Error catched', e });
+    }
+}
+
+const removeFollowing = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const findedUser = await User.findById(req.params.id);
+        if (!findedUser) {
+            return res.status(404).json('User not found');
+        }
+        const { following } = req.body;
+        const findedFollowing = await User.findById(following);
+        if (!findedFollowing) {
+            return res.status(404).json('Following not found');
+        }
+
+        const alreadyFollowing = findedUser.following.find((f) => f.toString() === following.toString());
+        if (alreadyFollowing) {
+            findedUser.following = findedUser.following.filter((f) => f.toString() !== following.toString());
+            findedFollowing.followers = findedFollowing.followers.filter((f) => f.toString() !== findedUser._id.toString());
+            await findedUser.save();
+            await findedFollowing.save();
+            return res.status(200).json({ message: 'You unfollow this user', findedUser });
+        } else {
+            return res.status(404).json('You do not follow this user');
+        }
+        
+
+    } catch (e) {
+        return res.status(500).json({ message: 'Error catched', e });
+    }
+}
+
+const removeFollower = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const findedUser = await User.findById(req.params.id);
+        if (!findedUser) {
+            return res.status(404).json('User not found');
+        }
+        const { follower } = req.body;
+        const findedFollower = await User.findById(follower);
+        if (!findedFollower) {
+            return res.status(404).json('Follower not found');
+        }
+
+        const alreadyFollower = findedUser.followers.find((f) => f.toString() === follower.toString());
+        if (alreadyFollower) {
+            findedUser.followers = findedUser.followers.filter((f) => f.toString() !== follower.toString());
+            findedFollower.following = findedFollower.following.filter((f) => f.toString() !== findedUser._id.toString());
+            await findedUser.save();
+            await findedFollower.save();
+            return res.status(200).json({ message: 'You remove this follower', findedUser });
+        } else {
+            return res.status(404).json('This user is not your follower');
+        }
+        
+
+    } catch (e) {
+        return res.status(500).json({ message: 'Error catched', e });
+    }
+}
+export default { 
+    createUser, 
+    readUser, 
+    readAll, 
+    updateUser, 
+    deleteUser, 
+    login, 
+    logout, 
+    addPlaylist, 
+    removePlaylist,
+    addFollowing,
+    removeFollowing,
+    removeFollower
+
+};

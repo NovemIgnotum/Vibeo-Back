@@ -2,6 +2,7 @@ import e, { NextFunction, Request, Response } from 'express';
 import Track from '../models/Track';
 import Playlist from '../models/Playlist';
 import Band from '../models/Band';
+import User from '../models/User';
 import cloudinary from '../config/cloudinary';
 
 const createTrack = async (req: Request, res: Response, next: NextFunction) => {
@@ -9,17 +10,15 @@ const createTrack = async (req: Request, res: Response, next: NextFunction) => {
         if (!req.body.title || !req.body.band || !req.body.genre || !req.body.playlist || !Object(req).files.track) {
             return res.status(400).json({ message: 'Missing parameters' });
         } else {
-            console.log('here');
             const playlistFinded = await Playlist.findById(req.body.playlist);
             if (!playlistFinded) {
                 return res.status(404).json({ message: 'Playlist not found' });
             }
-            console.log('here2');
             const trackfinded = playlistFinded.tracks.find((track) => Object(track).title === req.body.title);
             if (trackfinded) {
                 return res.status(400).json({ message: 'Track already in playlist' });
             }
-            const bandFinded = await Band.findOne({ name: req.body.band });
+            const bandFinded = await Band.findById(req.body.band);
             if (!bandFinded) {
                 return res.status(404).json({ message: 'Band not found' });
             }
@@ -109,4 +108,66 @@ const deleteTrack = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(500).json({ message: Object(e).message });
     }
 };
-export default { createTrack, readAllTracks, readTrack, updateTrack, deleteTrack };
+
+const likeTrack = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.body.user) {
+            return res.status(400).json({ message: 'No user provided' });
+        }
+
+        const track = await Track.findById(req.params.id);
+        if (!track) {
+            return res.status(404).json({ message: 'Track not found' });
+        }
+        const user = await User.findById(req.body.user);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const trackFinded = user.likedTracks.find((trackId) => trackId.toString() === track.id.toString());
+        console.log(trackFinded);
+
+        if (trackFinded) {
+            return res.status(400).json({ message: 'Track already liked' });
+        } else {
+            user.likedTracks.push(track.id);
+            await user.save();
+            return res.status(200).json({ message: 'Track liked' });
+        }
+    } catch (e) {
+        return res.status(500).json({ message: Object(e).message });
+    }
+}
+
+const dislikeTrack = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.body.user) {
+            return res.status(400).json({ message: 'No user provided' });
+        }
+
+        const track = await Track.findById(req.params.id);
+        if (!track) {
+            return res.status(404).json({ message: 'Track not found' });
+        }
+        const user = await User.findById(req.body.user);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const trackFinded = user.likedTracks.find((trackId) => trackId.toString() === track.id.toString());
+        console.log(trackFinded);
+
+        if (!trackFinded) {
+            return res.status(400).json({ message: 'Track not liked' });
+        } else {
+            user.likedTracks = user.likedTracks.filter((trackId) => trackId.toString() !== track.id.toString());
+            await user.save();
+            return res.status(200).json({ message: 'Track disliked' });
+        }
+    } catch (e) {
+        return res.status(500).json({ message: Object(e).message });
+    }
+}
+export default { createTrack, readAllTracks, readTrack, updateTrack, deleteTrack, likeTrack, dislikeTrack };

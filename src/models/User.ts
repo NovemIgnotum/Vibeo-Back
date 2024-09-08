@@ -16,7 +16,11 @@ const userSchema = new Schema<IUser>({
     tokenVersion: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    playlist: [{ type: Schema.Types.ObjectId }]
+    playlist: [{ type: Schema.Types.ObjectId }],
+    likedTracks: [{ type: Schema.Types.ObjectId }],
+    following: [{ type: Schema.Types.ObjectId }],
+    followers: [{ type: Schema.Types.ObjectId }]
+
 });
 
 const User = model<IUser>('User', userSchema);

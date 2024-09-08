@@ -9,6 +9,8 @@ const cpUpload = upload.fields([{ name: 'track', maxCount: 1 }]);
 const router = express.Router();
 
 router.post('/Create/', cpUpload, controller.createTrack);
+router.post('/like/:id', controller.likeTrack);
+router.post('/dislike/:id', controller.dislikeTrack);
 router.get('/GetAll/', controller.readAllTracks);
 router.get('/:id', controller.readTrack);
 router.put('/Update/:id', cpUpload, controller.updateTrack);

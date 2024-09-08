@@ -12,6 +12,9 @@ export interface IUser extends Document {
     profilePicture: String;
     backgroundPicture: String;
     playlist: Types.ObjectId[];
+    likedTracks: Types.ObjectId[];
+    following: Types.ObjectId[];
+    followers: Types.ObjectId[];
     salt: string;
     hash: string;
     createdAt: Date;

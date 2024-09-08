@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import cloudinary from '../config/cloudinary';
 import Playlist from '../models/Playlist';
 import User from '../models/User';
+import Band from '../models/Band';
 import Retour from '../library/Response';
 
 const createPlaylist = async (req: Request, res: Response) => {
@@ -14,11 +15,14 @@ const createPlaylist = async (req: Request, res: Response) => {
         }
 
         const findedUser = await User.findById(owner);
+        const findedBand = await Band.findById(owner);
 
-        if (!findedUser) {
-            Retour.error('User not found');
-            return res.status(404).json({ message: 'User not found' });
-        }
+        console.log(findedUser, findedBand);
+
+        if (!findedUser && !findedBand) {
+            Retour.error('User or Band not found');
+            return res.status(404).json({ message: 'User or band not found' });
+        } 
 
         let coverUrl = '';
 
@@ -42,7 +46,15 @@ const createPlaylist = async (req: Request, res: Response) => {
 
         await playlist.save();
 
-        await findedUser.playlist.push(playlist._id);
+        if (findedUser) {
+            findedUser.playlist.push(playlist._id);
+            await findedUser.save();
+        }
+        if (findedBand) {
+            findedBand.albums.push(playlist._id);
+            await findedBand.save();
+        }
+
 
 
         res.status(201).json({ message: 'Playlist created', playlist });
@@ -52,9 +64,29 @@ const createPlaylist = async (req: Request, res: Response) => {
     }
 };
 
+const readPlaylist = async (req: Request, res: Response) => {
+    try {
+        if (!req.params.id) {
+            Retour.error('No ID provided');
+            return res.status(400).json({ message: 'No ID provided' });
+        } else {
+            const playlist = await Playlist.findById(req.params.id).populate('tracks');
+            if (!playlist) {
+                Retour.error('Playlist not found');
+                return res.status(404).json({ message: 'Playlist not found' });
+            } else {
+                res.status(200).json({ message: 'Playlist found', playlist });
+            }
+        }
+    } catch (error) {
+        Retour.error(error);
+        res.status(500).json({ message: 'Error reading playlist', error: Object(error).message });
+    }
+}
+
 const readAllPlaylists = async (req: Request, res: Response) => {
     try {
-        const playlists = await Playlist.find().populate('tracks');
+        const playlists = await Playlist.find()
         res.status(200).json({ message: 'All playlists', playlists });
     } catch (error) {
         Retour.error(error);
@@ -65,7 +97,7 @@ const readAllPlaylists = async (req: Request, res: Response) => {
 const readAllPlaylistsByUser = async (req: Request, res: Response) => {
     try {
         const { owner } = req.params;
-        const playlists = await Playlist.find({ owner }).populate('tracks');
+        const playlists = await Playlist.find({ owner });
         res.status(200).json({ message: 'All playlists by user', playlists });
     } catch (error) {
         Retour.error(error);

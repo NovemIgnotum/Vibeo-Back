@@ -15,6 +15,7 @@ router.get('/GetAll/', controller.readAll);
 router.get('/:id', controller.readUser);
 router.post('/Login/', controller.login);
 router.post('/Logout/', controller.logout);
+router.post('/follows/:id', controller.addFollowing);
 router.put('/Update/:id', cpUpload, controller.updateUser);
 router.delete('/Delete/:id', controller.deleteUser);
 router.put('/addPlaylist/:id', controller.addPlaylist);

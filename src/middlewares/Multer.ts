@@ -1,13 +1,10 @@
-// src/middlewares/Multer.ts
 import { Options, diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 
-// Chemin de destination pour les fichiers téléchargés
 const uploadDir = path.join(__dirname, '../uploads');
 
-// Crée le répertoire s'il n'existe pas
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
