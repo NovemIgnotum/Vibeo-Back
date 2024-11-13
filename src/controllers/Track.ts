@@ -70,22 +70,26 @@ const readTrack = async (req: Request, res: Response, next: NextFunction) => {
 const updateTrack = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const track = await Track.findById(req.params.id);
+        console.log(track);
         if (!track) {
             return res.status(404).json({ message: 'Track not found' });
         }
         if (req.body.title) {
             track.title = req.body.title;
+            console.log('title updated');
         }
-        if (Object(req).files.track) {
+        if (req.files && Object(req).files.track !== undefined) {
             const trackRes = track.track.split('/').pop();
             cloudinary.v2.uploader.destroy(trackRes?.split('.')[0]);
 
-            const audioKeys = Object(req.files).track[0];
+            const audioKeys = Object(req).files.track[0];
             const resultAudio = await cloudinary.v2.uploader.upload(audioKeys.path, { resource_type: 'video' });
             track.track = resultAudio.secure_url;
         }
 
         await track.save();
+
+        console.log('should be save');
 
         return res.status(200).json({ message: 'Track updated', track });
     } catch (e) {
@@ -138,7 +142,7 @@ const likeTrack = async (req: Request, res: Response, next: NextFunction) => {
     } catch (e) {
         return res.status(500).json({ message: Object(e).message });
     }
-}
+};
 
 const dislikeTrack = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -169,5 +173,5 @@ const dislikeTrack = async (req: Request, res: Response, next: NextFunction) => 
     } catch (e) {
         return res.status(500).json({ message: Object(e).message });
     }
-}
+};
 export default { createTrack, readAllTracks, readTrack, updateTrack, deleteTrack, likeTrack, dislikeTrack };
