@@ -9,6 +9,7 @@ const cpUpload = upload.fields([{ name: 'cover', maxCount: 1 }]);
 const router = express.Router();
 
 router.post('/create', cpUpload, controller.createPlaylist);
+router.get('/read/:id', controller.readPlaylist);
 router.get('/readAll', controller.readAllPlaylists);
 router.get('/readAll/:owner', controller.readAllPlaylistsByUser);
 router.put('/update/:id', cpUpload, controller.updatePlaylist);

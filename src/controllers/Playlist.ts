@@ -22,7 +22,7 @@ const createPlaylist = async (req: Request, res: Response) => {
         if (!findedUser && !findedBand) {
             Retour.error('User or Band not found');
             return res.status(404).json({ message: 'User or band not found' });
-        } 
+        }
 
         let coverUrl = '';
 
@@ -55,8 +55,6 @@ const createPlaylist = async (req: Request, res: Response) => {
             await findedBand.save();
         }
 
-
-
         res.status(201).json({ message: 'Playlist created', playlist });
     } catch (error) {
         Retour.error(error);
@@ -82,11 +80,11 @@ const readPlaylist = async (req: Request, res: Response) => {
         Retour.error(error);
         res.status(500).json({ message: 'Error reading playlist', error: Object(error).message });
     }
-}
+};
 
 const readAllPlaylists = async (req: Request, res: Response) => {
     try {
-        const playlists = await Playlist.find()
+        const playlists = await Playlist.find();
         res.status(200).json({ message: 'All playlists', playlists });
     } catch (error) {
         Retour.error(error);
@@ -167,4 +165,4 @@ const deletePlaylist = async (req: Request, res: Response) => {
     }
 };
 
-export default { createPlaylist, readAllPlaylists, readAllPlaylistsByUser, updatePlaylist, deletePlaylist };
+export default { createPlaylist, readPlaylist, readAllPlaylists, readAllPlaylistsByUser, updatePlaylist, deletePlaylist };
