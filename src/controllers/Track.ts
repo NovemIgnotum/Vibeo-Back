@@ -30,7 +30,8 @@ const createTrack = async (req: Request, res: Response, next: NextFunction) => {
                 title: req.body.title,
                 genre: req.body.genre,
                 band: bandFinded._id,
-                track: resultAudio.secure_url
+                track: resultAudio.secure_url,
+                originalAlbum: playlistFinded._id
             });
 
             playlistFinded.tracks.push(track);
@@ -57,7 +58,7 @@ const readAllTracks = async (req: Request, res: Response, next: NextFunction) =>
 
 const readTrack = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const track = await Track.findById(req.params.id);
+        const track = await Track.findById(req.params.id).populate('band').populate('originalAlbum');
         if (!track) {
             return res.status(404).json({ message: 'Track not found' });
         }
@@ -70,13 +71,11 @@ const readTrack = async (req: Request, res: Response, next: NextFunction) => {
 const updateTrack = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const track = await Track.findById(req.params.id);
-        console.log(track);
         if (!track) {
             return res.status(404).json({ message: 'Track not found' });
         }
         if (req.body.title) {
             track.title = req.body.title;
-            console.log('title updated');
         }
         if (req.files && Object(req).files.track !== undefined) {
             const trackRes = track.track.split('/').pop();
@@ -85,6 +84,13 @@ const updateTrack = async (req: Request, res: Response, next: NextFunction) => {
             const audioKeys = Object(req).files.track[0];
             const resultAudio = await cloudinary.v2.uploader.upload(audioKeys.path, { resource_type: 'video' });
             track.track = resultAudio.secure_url;
+        }
+        if (req.body.originalAlbum) {
+            const findedAlbum = await Playlist.findById(req.body.originalAlbum);
+            if (!findedAlbum) {
+                return res.status(404).json({ message: 'Album not found' });
+            }
+            track.originalAlbum = findedAlbum._id;
         }
 
         await track.save();

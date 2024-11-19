@@ -5,4 +5,5 @@ export interface Track extends Document {
     band: Types.ObjectId;
     genre: Types.ObjectId;
     track: string;
+    originalAlbum: Types.ObjectId;
 }
