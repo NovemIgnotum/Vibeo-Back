@@ -49,7 +49,7 @@ const createTrack = async (req: Request, res: Response, next: NextFunction) => {
 
 const readAllTracks = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const tracks = await Track.find();
+        const tracks = await Track.find().populate('band').populate('originalAlbum');
         return res.status(200).json(tracks);
     } catch (error) {
         return res.status(500).json({ message: Object(error).message });
