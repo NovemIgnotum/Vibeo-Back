@@ -80,10 +80,10 @@ const readPlaylist = async (req: Request, res: Response) => {
                 if (!band) {
                     return res.status(404).json({ message: 'Owner not found' });
                 } else {
-                    res.status(200).json({ playlist, band });
+                    res.status(200).json({ message: 'playlist owned by band', playlist, band });
                 }
             } else {
-                res.status(200).json({ playlist, owner });
+                res.status(200).json({ message: 'playlist owned by band', playlist, owner });
             }
         }
     } catch (error) {
