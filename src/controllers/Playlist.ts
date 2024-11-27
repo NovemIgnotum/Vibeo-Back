@@ -4,6 +4,7 @@ import Playlist from '../models/Playlist';
 import User from '../models/User';
 import Band from '../models/Band';
 import Retour from '../library/Response';
+import path from 'path';
 
 const createPlaylist = async (req: Request, res: Response) => {
     try {
@@ -68,12 +69,25 @@ const readPlaylist = async (req: Request, res: Response) => {
             Retour.error('No ID provided');
             return res.status(400).json({ message: 'No ID provided' });
         } else {
-            const playlist = await Playlist.findById(req.params.id).populate('tracks');
+            const playlist = await Playlist.findById(req.params.id).populate({
+                path: 'tracks',
+                populate: [
+                    {
+                        path: 'originalAlbum',
+                        model: 'Playlist'
+                    },
+                    {
+                        path: 'band',
+                        model: 'Band'
+                    }
+                ]
+            });
 
             if (!playlist) {
                 Retour.error('Playlist not found');
                 return res.status(404).json({ message: 'Playlist not found' });
             }
+
             const owner = await User.findById(playlist.owner);
             if (!owner) {
                 const band = await Band.findById(playlist.owner);
