@@ -69,11 +69,21 @@ const readPlaylist = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'No ID provided' });
         } else {
             const playlist = await Playlist.findById(req.params.id).populate('tracks');
+
             if (!playlist) {
                 Retour.error('Playlist not found');
                 return res.status(404).json({ message: 'Playlist not found' });
+            }
+            const owner = await User.findById(playlist.owner);
+            if (!owner) {
+                const band = await Band.findById(playlist.owner);
+                if (!band) {
+                    return res.status(404).json({ message: 'Owner not found' });
+                } else {
+                    res.status(200).json({ playlist, band });
+                }
             } else {
-                res.status(200).json({ message: 'Playlist found', playlist });
+                res.status(200).json({ playlist, owner });
             }
         }
     } catch (error) {
