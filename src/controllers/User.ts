@@ -1,18 +1,19 @@
 import e, { NextFunction, Request, Response } from 'express';
 import cloudinary from '../config/cloudinary';
+import { createSession, getSession, deleteSession } from '../services/sessionService';
 const SHA256 = require('crypto-js/sha256');
 const encBase64 = require('crypto-js/enc-base64');
 const uid2 = require('uid2');
 const jwt = require('jsonwebtoken');
+const SESSION_TTL = 60 * 60 * 24; // 1 jour
 
 import User from '../models/User';
 import Playlist from '../models/Playlist';
-import { error } from 'console';
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { email, name, firstname, password, pseudo} = req.body;
-        if (!email || !name || !firstname || !password || !pseudo ) {
+        const { email, name, firstname, password, pseudo } = req.body;
+        if (!email || !name || !firstname || !password || !pseudo) {
             return res.status(400).json({ message: 'Missing parameters' });
         } else {
             if (await User.findOne({ pseudo })) {
@@ -23,7 +24,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
                 } else {
                     const salt: string = uid2(26);
                     const hash: string = SHA256(password + salt).toString(encBase64);
-    
+
                     if (req.body.role) {
                         const role = req.body.role;
                         const user = new User({
@@ -37,7 +38,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
                             salt,
                             hash
                         });
-    
+
                         return user
                             .save()
                             .then((user) => res.status(201).json({ user: user }))
@@ -53,7 +54,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
                             salt,
                             hash
                         });
-    
+
                         return user
                             .save()
                             .then((user) => res.status(201).json({ user: user }))
@@ -62,11 +63,9 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
                 }
             }
         }
-
     } catch (error) {
         return res.status(500).json({ error: Object(error).message });
     }
-
 };
 
 const readUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -80,14 +79,14 @@ const readUser = async (req: Request, res: Response, next: NextFunction) => {
                 return res.status(404).json({ message: 'User not found' });
             } else {
                 return res.status(200).json({ message: userFinded });
+            }
         }
-    }
     } catch (error) {
         return res.status(500).json({ error: Object(error).message });
     }
 };
 
-const readAll =  async (req: Request, res: Response, next: NextFunction) => {
+const readAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const users = await User.find();
         if (!users) {
@@ -95,7 +94,6 @@ const readAll =  async (req: Request, res: Response, next: NextFunction) => {
         } else {
             return res.status(200).json({ message: users });
         }
-
     } catch (error) {
         return res.status(500).json({ error: Object(error).message });
     }
@@ -114,8 +112,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             if (findedUser) {
                 const verificatedHash = SHA256(password + findedUser.salt).toString(encBase64);
                 if (verificatedHash === findedUser.hash) {
-                    const token = jwt.sign({ findedUser }, process.env.JWT_SECRET, { expiresIn: '1h' });
-                    return res.status(200).json({ message: 'Connected', token: token, id: findedUser.id });
+                    const sessionId = `session:${uid2(26)}`;
+                    const userData = { findedUser, loggedInAt: new Date() };
+                    await createSession(sessionId, userData, SESSION_TTL);
+                    res.cookie('sessionId', sessionId, { httpOnly: true, secure: true, sameSite: 'none' });
+                    return res.status(200).json({ message: 'Connected', id: findedUser.id, sessionId: sessionId });
                 } else {
                     return res.status(400).json({ message: 'Wrong password' });
                 }
@@ -123,11 +124,9 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
                 return res.status(404).json({ message: 'User not found' });
             }
         }
-
     } catch (error) {
         return res.status(500).json({ error: Object(error).message });
     }
- 
 };
 
 const logout = async (req: Request, res: Response, next: NextFunction) => {
@@ -319,7 +318,7 @@ const addFollowing = async (req: Request, res: Response, next: NextFunction) => 
     } catch (e) {
         return res.status(500).json({ message: 'Error catched', e });
     }
-}
+};
 
 const removeFollowing = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -343,12 +342,10 @@ const removeFollowing = async (req: Request, res: Response, next: NextFunction) 
         } else {
             return res.status(404).json('You do not follow this user');
         }
-        
-
     } catch (e) {
         return res.status(500).json({ message: 'Error catched', e });
     }
-}
+};
 
 const removeFollower = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -372,24 +369,21 @@ const removeFollower = async (req: Request, res: Response, next: NextFunction) =
         } else {
             return res.status(404).json('This user is not your follower');
         }
-        
-
     } catch (e) {
         return res.status(500).json({ message: 'Error catched', e });
     }
-}
-export default { 
-    createUser, 
-    readUser, 
-    readAll, 
-    updateUser, 
-    deleteUser, 
-    login, 
-    logout, 
-    addPlaylist, 
+};
+export default {
+    createUser,
+    readUser,
+    readAll,
+    updateUser,
+    deleteUser,
+    login,
+    logout,
+    addPlaylist,
     removePlaylist,
     addFollowing,
     removeFollowing,
     removeFollower
-
 };
