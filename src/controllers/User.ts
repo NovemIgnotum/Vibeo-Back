@@ -115,8 +115,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
                     const sessionId = `session:${uid2(26)}`;
                     const userData = { findedUser, loggedInAt: new Date() };
                     await createSession(sessionId, userData, SESSION_TTL);
-                    res.cookie('sessionId', sessionId, { httpOnly: true, secure: true, sameSite: 'none' });
-                    return res.status(200).json({ message: 'Connected', id: findedUser.id, sessionId: sessionId });
+                    res.cookie('sessionId', sessionId, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: SESSION_TTL * 1000 });
+                    return res.status(200).json({ message: 'Connected', id: findedUser.id });
                 } else {
                     return res.status(400).json({ message: 'Wrong password' });
                 }

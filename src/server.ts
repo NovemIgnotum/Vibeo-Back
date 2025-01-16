@@ -44,7 +44,8 @@ const startServer = () => {
 
     router.use(
         cors({
-            origin: '*'
+            origin: '*',
+            Credentials: true
         })
     );
 
