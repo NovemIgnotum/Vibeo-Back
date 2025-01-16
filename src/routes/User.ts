@@ -20,5 +20,6 @@ router.put('/Update/:id', cpUpload, controller.updateUser);
 router.delete('/Delete/:id', controller.deleteUser);
 router.put('/addPlaylist/:id', controller.addPlaylist);
 router.put('/removePlaylist/:id', controller.removePlaylist);
+router.put('/getProfile/', controller.getProfile);
 
 export default router;

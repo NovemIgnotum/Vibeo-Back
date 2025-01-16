@@ -373,6 +373,26 @@ const removeFollower = async (req: Request, res: Response, next: NextFunction) =
         return res.status(500).json({ message: 'Error catched', e });
     }
 };
+
+const getProfile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('hmm cookies', req.cookies);
+        const sessionId = req.cookies.sessionId;
+        if (!sessionId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        } else {
+            const session = await getSession(sessionId);
+            if (!session) {
+                return res.status(401).json({ message: 'Unauthorized' });
+            } else {
+                return res.status(200).json({ message: session.findedUser });
+            }
+        }
+    } catch (error) {
+        return res.status(500).json({ error: Object(error).message });
+    }
+};
+
 export default {
     createUser,
     readUser,
@@ -385,5 +405,6 @@ export default {
     removePlaylist,
     addFollowing,
     removeFollowing,
-    removeFollower
+    removeFollower,
+    getProfile
 };
