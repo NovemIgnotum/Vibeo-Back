@@ -48,11 +48,11 @@ const createPlaylist = async (req: Request, res: Response) => {
         await playlist.save();
 
         if (findedUser) {
-            findedUser.playlist.push(playlist._id);
+            findedUser.playlist.push(Object(playlist)._id);
             await findedUser.save();
         }
         if (findedBand) {
-            findedBand.albums.push(playlist._id);
+            findedBand.albums.push(Object(playlist)._id);
             await findedBand.save();
         }
 

@@ -310,7 +310,7 @@ const addFollowing = async (req: Request, res: Response, next: NextFunction) => 
             return res.status(400).json('You already follow this user');
         } else {
             findedUser.following.push(following);
-            findedFollowing.followers.push(findedUser._id);
+            findedFollowing.followers.push(Object(findedUser)._id);
             await findedUser.save();
             await findedFollowing.save();
             return res.status(200).json({ message: 'You follow this user', findedUser });
@@ -335,7 +335,7 @@ const removeFollowing = async (req: Request, res: Response, next: NextFunction) 
         const alreadyFollowing = findedUser.following.find((f) => f.toString() === following.toString());
         if (alreadyFollowing) {
             findedUser.following = findedUser.following.filter((f) => f.toString() !== following.toString());
-            findedFollowing.followers = findedFollowing.followers.filter((f) => f.toString() !== findedUser._id.toString());
+            findedFollowing.followers = findedFollowing.followers.filter((f) => f.toString() !== Object(findedUser)._id.toString());
             await findedUser.save();
             await findedFollowing.save();
             return res.status(200).json({ message: 'You unfollow this user', findedUser });
@@ -362,7 +362,7 @@ const removeFollower = async (req: Request, res: Response, next: NextFunction) =
         const alreadyFollower = findedUser.followers.find((f) => f.toString() === follower.toString());
         if (alreadyFollower) {
             findedUser.followers = findedUser.followers.filter((f) => f.toString() !== follower.toString());
-            findedFollower.following = findedFollower.following.filter((f) => f.toString() !== findedUser._id.toString());
+            findedFollower.following = findedFollower.following.filter((f) => f.toString() !== Object(findedUser)._id.toString());
             await findedUser.save();
             await findedFollower.save();
             return res.status(200).json({ message: 'You remove this follower', findedUser });
@@ -375,7 +375,6 @@ const removeFollower = async (req: Request, res: Response, next: NextFunction) =
 };
 
 const getProfile = async (req: Request, res: Response, next: NextFunction) => {
-    console.log('hmm cookies', req);
     try {
         console.log('hmm cookies', req.cookies);
         const sessionId = req.cookies.sessionId;

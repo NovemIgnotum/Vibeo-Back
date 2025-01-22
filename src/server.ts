@@ -4,6 +4,7 @@ import http, { METHODS } from 'http';
 import mongoose from 'mongoose';
 import config from './config/config';
 import Logging from './library/Logging';
+import cookieParser from 'cookie-parser';
 
 //MODEL
 import Band from './models/Band';
@@ -61,6 +62,8 @@ const startServer = () => {
             optionsSuccessStatus: 204
         })
     );
+
+    router.use(cookieParser());
 
     router.use(express.urlencoded({ extended: true }));
     router.use(express.json({}));

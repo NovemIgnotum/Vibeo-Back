@@ -90,7 +90,7 @@ const updateTrack = async (req: Request, res: Response, next: NextFunction) => {
             if (!findedAlbum) {
                 return res.status(404).json({ message: 'Album not found' });
             }
-            track.originalAlbum = findedAlbum._id;
+            Object(track).originalAlbum = findedAlbum._id;
         }
 
         await track.save();
