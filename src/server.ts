@@ -44,8 +44,8 @@ const startServer = () => {
 
     router.use(
         cors({
-            origin: '*',
-            Credentials: true
+            origin: ['http://127.0.0.1:3000', 'http://127.0.0.1:5173', 'http://localhost:3000', 'http://localhost:5173'],
+            credentials: true
         })
     );
 
@@ -64,8 +64,6 @@ const startServer = () => {
 
     // The rules of the API
     router.use((req: Request, res: Response, next: NextFunction) => {
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-with, Content-Type, Accept,Authorization');
         if (req.method == 'OPTIONS') {
             res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
             return res.status(200).json({});
