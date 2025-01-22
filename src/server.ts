@@ -37,18 +37,11 @@ import UserRoutes from './routes/User';
 import PlaylistRoutes from './routes/Playlist';
 
 // The server start only if mongo is already connected
+
 const startServer = () => {
     cron.schedule('0 0 * * *', () => {
         Logging.info('Running a task every day at 00:00');
     });
-
-    router.use(
-        cors({
-            origin: ['http://127.0.0.1:3000', 'http://127.0.0.1:5173', 'http://localhost:3000', 'http://localhost:5173'],
-            METHODS: ['GET', 'POST', 'PUT', 'DELETE'],
-            credentials: true
-        })
-    );
 
     router.use((req: Request, res: Response, next: NextFunction) => {
         Logging.info(`Incoming -> Methode: [${req.method}] - Url: [${req.originalUrl}] - Ip: [${req.socket.remoteAddress}]`);
@@ -59,6 +52,15 @@ const startServer = () => {
         });
         next();
     });
+
+    router.use(
+        cors({
+            origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Allow multiple origins
+            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+            credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+            optionsSuccessStatus: 204
+        })
+    );
 
     router.use(express.urlencoded({ extended: true }));
     router.use(express.json({}));
