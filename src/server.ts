@@ -1,6 +1,6 @@
 // MODULES
 import { Request, Response, NextFunction } from 'express';
-import http from 'http';
+import http, { METHODS } from 'http';
 import mongoose from 'mongoose';
 import config from './config/config';
 import Logging from './library/Logging';
@@ -44,7 +44,8 @@ const startServer = () => {
 
     router.use(
         cors({
-            origin: '*',
+            origin: ['http://127.0.0.1:3000', 'http://127.0.0.1:5173', 'http://localhost:3000', 'http://localhost:5173'],
+            METHODS: ['GET', 'POST', 'PUT', 'DELETE'],
             credentials: true
         })
     );
